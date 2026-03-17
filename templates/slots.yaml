@@ -1,0 +1,94 @@
+# Slot definitions for content engine templates
+# Each template defines named slots where dynamic content is injected.
+#
+# Slot types:
+#   text    — rendered as SVG <text> element
+#   image   — embedded as SVG <image> (PNG from charts-img or other source)
+#   overlay — design element positioned relative to another slot
+#
+# Coordinates are in SVG viewBox units (not pixels).
+# Templates use viewBox coordinates; final render scales to pixel dimensions.
+
+# ─── Instagram Story / Reels (1080×1920, viewBox 810×1440) ───────────────
+
+story/dark-01:
+  format: story
+  dimensions: { width: 1080, height: 1920 }
+  viewbox: { width: 810, height: 1440 }
+  theme: dark
+  slots:
+    title:
+      type: text
+      x: 76
+      y: 220
+      max_width: 660
+      font_family: "Inter"
+      font_weight: 700
+      font_size: 44
+      color: "#FFFFFF"
+      line_height: 1.2
+      max_lines: 3
+    chart:
+      type: image
+      x: 76
+      y: 380
+      width: 660
+      height: 520
+    chart_highlight:
+      type: overlay
+      ref: "chart-highlight-gold"
+      anchor: chart
+      offset_x: -15
+      offset_y: -15
+      width: 690
+      height: 550
+      z_index: -1
+    body:
+      type: text
+      x: 76
+      y: 980
+      max_width: 660
+      font_family: "Inter"
+      font_weight: 400
+      font_size: 24
+      color: "#CCCCCC"
+      line_height: 1.4
+      max_lines: 8
+    source:
+      type: text
+      x: 76
+      y: 1340
+      max_width: 660
+      font_family: "Inter"
+      font_weight: 400
+      font_size: 18
+      color: "#666666"
+      max_lines: 1
+    branding:
+      type: text
+      x: 76
+      y: 1400
+      max_width: 300
+      font_family: "Inter"
+      font_weight: 600
+      font_size: 20
+      color: "#CEAD63"
+      text: "propertyiq.ae"
+
+# ─── Instagram Post (1080×1080) — uncomment when template is ready ───────
+
+# post/dark-01:
+#   format: post
+#   dimensions: { width: 1080, height: 1080 }
+#   viewbox: { width: 810, height: 810 }
+#   theme: dark
+#   slots: ...
+
+# ─── X / Twitter Banner (1200×675) — uncomment when template is ready ────
+
+# banner/dark-01:
+#   format: banner
+#   dimensions: { width: 1200, height: 675 }
+#   viewbox: { width: 900, height: 506 }
+#   theme: dark
+#   slots: ...
