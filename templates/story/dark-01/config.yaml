@@ -1,0 +1,64 @@
+meta:
+  format: story
+  dimensions: { width: 1080, height: 1920 }
+  viewbox: { width: 810, height: 1440 }
+  theme: dark
+  background: "#353535"
+  categories: [market-insight, data-highlight, news-commentary]
+
+prompt: |
+  You are writing a social media story card for PropertyIQ — Dubai real estate intelligence.
+  Given the input data, generate:
+  - title: Bold headline, max 60 chars. Lead with the insight, not the area name.
+  - body: 3-4 sentences explaining the data trend. Casual but authoritative.
+
+  Style: Direct, no fluff. Bloomberg meets Instagram.
+  Never start with area name — lead with the number or insight.
+  Use AED for currency. Use /sqft or /sqm consistently with input data.
+
+  Examples:
+    title: "AED 1,850/sqft — Marina hits 3-year high"
+    body: "Dubai Marina sale prices climbed 12% year-on-year, reaching levels not seen since 2022. Volume remains strong at 487 transactions in the trailing 12 months, suggesting sustained demand rather than a speculative spike."
+
+    title: "287% volume surge in JVC"
+    body: "Jumeirah Village Circle recorded 2,340 transactions in the past 12 months — nearly triple the previous year. At AED 850/sqft, it remains one of Dubai's most accessible investment areas with gross yields above 8%."
+
+slots:
+  title:
+    type: text
+    x: 76
+    y: 450
+    max_width: 660
+    font: { family: Inter, weight: 700, size: 44 }
+    color: "#FFFFFF"
+    line_height: 1.2
+    max_lines: 3
+  chart:
+    type: image
+    x: 76
+    y: 873
+    width: 658
+    height: 200
+  chart_highlight:
+    type: overlay
+    ref: overlays/chart-highlight-gold.png
+    anchor: chart
+    offset: { x: -10, y: -10 }
+    size: { width: 678, height: 220 }
+    z_index: -1
+  body:
+    type: text
+    x: 76
+    y: 1120
+    max_width: 658
+    font: { family: Inter, weight: 400, size: 22 }
+    color: "#CCCCCC"
+    line_height: 1.5
+    max_lines: 6
+  branding:
+    type: text
+    x: 76
+    y: 1380
+    font: { family: Inter, weight: 600, size: 20 }
+    color: "#CEAD63"
+    static: "propertyiq.ae"

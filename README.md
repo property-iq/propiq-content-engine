@@ -1,6 +1,6 @@
 # propiq-content-engine
 
-Daily social media content generation for PropertyIQ. LLM generates text; branded SVG templates produce image creatives.
+Daily social media content generation for PropertyIQ. LLM generates text; branded SVG templates produce image creatives. Manual review and posting.
 
 ## How It Works
 
@@ -14,89 +14,116 @@ data-api (metrics) ───────┘         │
 
 ## Template System
 
-Templates are SVG files exported from Adobe Illustrator. The engine injects dynamic content (text, charts, overlays) into defined slot positions, then renders to PNG via Puppeteer.
+Each template is a self-contained directory with three files:
+
+```
+templates/{format}/{theme}-{nn}/
+├── base.svg          # Background template (static layers from Illustrator)
+├── config.yaml       # Slot positions + LLM prompt + metadata
+└── reference.svg     # Filled example (visual reference, not used by system)
+```
 
 ### Directory Structure
 
 ```
 templates/
-├── formats/                    # Base templates (SVG backgrounds)
-│   ├── story/                  # 1080×1920 (9:16) — IG Stories, Reels
-│   │   ├── dark-01.svg
-│   │   └── dark-02.svg
-│   ├── post/                   # 1080×1080 (1:1) — IG Posts, FB
-│   │   └── dark-01.svg
-│   └── banner/                 # 1200×675 (16:9) — X/Twitter
-│       └── dark-01.svg
-├── overlays/                   # Reusable design elements (PNG/SVG)
-│   ├── chart-highlight-gold.png
-│   └── ...
-├── references/                 # Filled examples (visual reference only, not used by system)
-│   └── story-dark-01-filled.svg
-└── slots.yaml                  # Slot definitions per template
+├── story/                        # 1080×1920 (9:16) — IG Stories, Reels
+│   ├── dark-01/
+│   │   ├── base.svg
+│   │   ├── config.yaml
+│   │   └── reference.svg
+│   └── dark-02/
+│       └── ...
+├── post/                         # 1080×1080 (1:1) — IG Posts, FB
+│   └── dark-01/
+│       └── ...
+├── banner/                       # 1200×675 (16:9) — X/Twitter
+│   └── dark-01/
+│       └── ...
+└── overlays/                     # Reusable design elements
+    └── chart-highlight-gold.png
 ```
-
-### Naming Convention
-
-| Component | Pattern | Example |
-|-----------|---------|---------|
-| Format dirs | `{shape}` | `story`, `post`, `banner` |
-| Templates | `{theme}-{nn}.svg` | `dark-01.svg`, `light-02.svg` |
-| Overlays | `{function}-{color}.{ext}` | `chart-highlight-gold.png` |
-| References | `{format}-{template}-filled.svg` | `story-dark-01-filled.svg` |
-
-### Formats
-
-| Format | Dimensions | Aspect | Platforms |
-|--------|-----------|--------|-----------|
-| `story` | 1080×1920 | 9:16 | IG Stories, Reels, TikTok, WhatsApp Status |
-| `post` | 1080×1080 | 1:1 | IG Posts, FB Posts, Telegram |
-| `banner` | 1200×675 | 16:9 | X/Twitter, LinkedIn, Telegram |
-
-### Slot System
-
-Each template has named slots defined in `slots.yaml`:
-
-- **text** — title, body, source attribution, branding
-- **image** — chart PNG from charts-img
-- **overlay** — design elements (highlights, dividers) positioned relative to other slots
 
 ### Adding a New Template
 
-1. Design in Illustrator (use one artboard per template variant)
-2. Export as SVG — background/static elements only, no text content
-3. Place SVG in `templates/formats/{format}/{theme}-{nn}.svg`
-4. Save a filled reference in `templates/references/`
-5. Define slot positions in `templates/slots.yaml`
+1. Design in Illustrator
+2. Export background as SVG → `base.svg`
+3. Export filled example → `reference.svg`
+4. Define slots, prompt, and metadata → `config.yaml`
+5. Place in `templates/{format}/{theme}-{nn}/`
+
+### config.yaml Structure
+
+```yaml
+meta:
+  format: story              # story | post | banner
+  dimensions: { width: 1080, height: 1920 }
+  viewbox: { width: 810, height: 1440 }
+  theme: dark
+  categories: [market-insight, data-highlight]
+
+prompt: |
+  LLM instructions for generating text content...
+  Include style guide, examples, constraints.
+
+slots:
+  title:
+    type: text               # text | image | overlay
+    x: 76
+    y: 450
+    max_width: 660
+    font: { family: Inter, weight: 700, size: 44 }
+    color: "#FFFFFF"
+  chart:
+    type: image
+    x: 76
+    y: 873
+    width: 658
+    height: 200
+  chart_highlight:
+    type: overlay
+    ref: overlays/chart-highlight-gold.png
+    anchor: chart
+    offset: { x: -10, y: -10 }
+```
+
+## Rendering Pipeline
+
+```
+1. Load base.svg (static background)
+2. Layer overlays (highlights, decorative elements)
+3. Embed chart PNG from charts-img
+4. Render text into slots (SVG text elements)
+5. Puppeteer renders composite → final PNG
+```
+
+## Formats
+
+| Format | Dimensions | Aspect | Platforms |
+|--------|-----------|--------|-----------|
+| `story` | 1080×1920 | 9:16 | IG Stories, Reels, WhatsApp Status |
+| `post` | 1080×1080 | 1:1 | IG Posts, FB, Telegram |
+| `banner` | 1200×675 | 16:9 | X/Twitter, LinkedIn |
 
 ## Content Categories
 
-| Category | Sources | Output |
-|----------|---------|--------|
-| Market Insight | chart + data-api metrics | Chart creative + insight text |
-| News Commentary | scout-news headline | News creative + analysis text |
-| Data Highlight | data-api surprising stat | Stat creative + context text |
-| Market Update | multiple charts + metrics | Summary creative + overview text |
-| Educational | curated content | Infographic + explainer text |
+| Category | Sources | Description |
+|----------|---------|-------------|
+| market-insight | chart + data-api | Chart with headline + insight |
+| news-commentary | scout-news | News headline + analysis |
+| data-highlight | data-api | Big stat + context |
+| market-update | charts + metrics | Weekly/monthly summary |
+| educational | curated | RE concepts explained |
 
 ## Output
 
-Each generation produces a content package:
 ```
 output/2026-03-18/
 ├── market-insight-01/
-│   ├── story.png           # 1080×1920
-│   ├── post.png            # 1080×1080
-│   ├── banner.png          # 1200×675
-│   ├── caption-ig.md       # Instagram caption
-│   ├── caption-x.md        # X/Twitter text
-│   ├── caption-telegram.md # Telegram text
-│   └── metadata.json       # Source refs, generation params
+│   ├── story.png
+│   ├── post.png
+│   ├── banner.png
+│   ├── caption-ig.md
+│   ├── caption-x.md
+│   └── metadata.json
 ```
-
-## Tech Stack
-
-- **Python / FastAPI** — content generation logic
-- **Puppeteer** — SVG → PNG rendering
-- **Gemini Flash** — LLM text generation
-- **GCS** — generated content storage
