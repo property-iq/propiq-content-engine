@@ -1,0 +1,42 @@
+name: Deploy to Cloud Run
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
+          service_account: ${{ secrets.WIF_SERVICE_ACCOUNT }}
+
+      - uses: google-github-actions/setup-gcloud@v2
+
+      - name: Deploy to Cloud Run
+        run: |
+          gcloud run deploy propiq-content-engine \
+            --source . \
+            --region me-central1 \
+            --project crowdproperty-440707 \
+            --allow-unauthenticated \
+            --min-instances 0 \
+            --max-instances 5 \
+            --cpu 2 \
+            --memory 2Gi \
+            --cpu-boost \
+            --set-env-vars "VERTEX_REGION=us-east5" \
+            --set-secrets "ANTHROPIC_API_KEY=anthropic-api-key:latest"

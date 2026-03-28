@@ -1,0 +1,61 @@
+meta:
+  format: banner
+  dimensions: { width: 1200, height: 675 }
+  viewbox: { width: 1200, height: 675 }
+  theme: dark
+  background: "#353535"
+  categories: [market-insight, data-highlight, news-commentary]
+
+prompt: |
+  You are writing a social media banner for PropertyIQ — Dubai real estate intelligence.
+  Given the input data, generate:
+  - title: Bold headline, max 50 chars. Lead with the insight, not the area name.
+  - body: 1-2 sentences. Punchy summary of the data trend.
+
+  Style: Direct, no fluff. Bloomberg meets Twitter.
+  Never start with area name — lead with the number or insight.
+  Use AED for currency. Use /sqft or /sqm consistently with input data.
+
+  Examples:
+    title: "Marina hits AED 1,850/sqft"
+    body: "Sale prices up 12% YoY with 487 transactions in T12M — sustained demand, not speculation."
+
+slots:
+  title:
+    type: text
+    x: 50
+    y: 70
+    max_width: 700
+    font: { family: Inter, weight: 700, size: 40 }
+    color: "#FFFFFF"
+    line_height: 1.2
+    max_lines: 2
+  chart:
+    type: image
+    x: 50
+    y: 180
+    width: 500
+    height: 400
+  chart_highlight:
+    type: overlay
+    ref: overlays/chart-highlight-gold.png
+    anchor: chart
+    offset: { x: -10, y: -10 }
+    size: { width: 520, height: 420 }
+    z_index: -1
+  body:
+    type: text
+    x: 600
+    y: 250
+    max_width: 550
+    font: { family: Inter, weight: 400, size: 24 }
+    color: "#CCCCCC"
+    line_height: 1.5
+    max_lines: 5
+  branding:
+    type: text
+    x: 600
+    y: 620
+    font: { family: Inter, weight: 600, size: 20 }
+    color: "#CEAD63"
+    static: "propertyiq.ae"

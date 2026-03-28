@@ -1,0 +1,61 @@
+meta:
+  format: post
+  dimensions: { width: 1080, height: 1080 }
+  viewbox: { width: 1080, height: 1080 }
+  theme: dark
+  background: "#353535"
+  categories: [market-insight, data-highlight, news-commentary]
+
+prompt: |
+  You are writing a social media post card for PropertyIQ — Dubai real estate intelligence.
+  Given the input data, generate:
+  - title: Bold headline, max 50 chars. Lead with the insight, not the area name.
+  - body: 2-3 sentences explaining the data trend. Casual but authoritative.
+
+  Style: Direct, no fluff. Bloomberg meets Instagram.
+  Never start with area name — lead with the number or insight.
+  Use AED for currency. Use /sqft or /sqm consistently with input data.
+
+  Examples:
+    title: "AED 1,850/sqft — Marina peaks"
+    body: "Dubai Marina sale prices climbed 12% year-on-year. Volume remains strong at 487 transactions in the trailing 12 months."
+
+slots:
+  title:
+    type: text
+    x: 60
+    y: 80
+    max_width: 960
+    font: { family: Inter, weight: 700, size: 48 }
+    color: "#FFFFFF"
+    line_height: 1.2
+    max_lines: 2
+  chart:
+    type: image
+    x: 60
+    y: 220
+    width: 960
+    height: 480
+  chart_highlight:
+    type: overlay
+    ref: overlays/chart-highlight-gold.png
+    anchor: chart
+    offset: { x: -10, y: -10 }
+    size: { width: 980, height: 500 }
+    z_index: -1
+  body:
+    type: text
+    x: 60
+    y: 760
+    max_width: 960
+    font: { family: Inter, weight: 400, size: 24 }
+    color: "#CCCCCC"
+    line_height: 1.5
+    max_lines: 4
+  branding:
+    type: text
+    x: 60
+    y: 1020
+    font: { family: Inter, weight: 600, size: 22 }
+    color: "#CEAD63"
+    static: "propertyiq.ae"
