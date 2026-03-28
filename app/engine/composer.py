@@ -75,7 +75,7 @@ def compose(
     for _, el in elements:
         svg_root.append(el)
 
-    return etree.tostring(svg_root, pretty_print=True, xml_declaration=True, encoding="unicode")
+    return etree.tostring(svg_root, pretty_print=True, encoding="unicode")
 
 
 def _build_text(slot_def: dict, text: str) -> list[etree._Element]:
