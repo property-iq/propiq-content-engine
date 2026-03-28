@@ -11,39 +11,24 @@ async def get_chart_png(
     property_type: str = "ALL",
     period_type: str = "monthly",
 ) -> bytes:
-    """Fetch a rendered chart PNG from charts-img via charts-api.
+    """Fetch a rendered chart PNG from charts-img.
 
-    The charts-img service renders Chart.js configs from charts-api into
-    Economist-style PNG images with the PropertyIQ brand bar.
+    Charts-img accepts the same request format as charts-api and returns
+    a PNG directly (it calls charts-api internally).
     """
-    # Build the charts-api render request
     chart_request = {
         "intent": intent,
         "metric": metric,
-        "entity_type": entity_type,
-        "entities": [entity_slug],
-        "filters": {"property_type": property_type, "period_type": period_type},
+        "entities": [{"type": entity_type, "identifier": entity_slug}],
+        "time_filter": {"period_type": period_type},
+        "property_filter": {"property_type": property_type},
         "mode": "static",
     }
 
-    async with httpx.AsyncClient(timeout=settings.http_timeout) as client:
-        # Get chart config from charts-api
-        config_resp = await client.post(
-            f"{settings.charts_api_base}/charts/render",
+    async with httpx.AsyncClient(timeout=60.0) as client:
+        resp = await client.post(
+            f"{settings.charts_img_base}/render",
             json=chart_request,
         )
-        config_resp.raise_for_status()
-        chart_data = config_resp.json()
-
-        # Get the chart slug for charts-img
-        slug = chart_data.get("meta", {}).get("slug")
-        if not slug:
-            raise ValueError("Charts API did not return a slug for PNG rendering")
-
-        # Render PNG via charts-img
-        img_resp = await client.get(
-            f"{settings.charts_img_base}/render/{slug}",
-            params={"preset": "whatsapp"},
-        )
-        img_resp.raise_for_status()
-        return img_resp.content
+        resp.raise_for_status()
+        return resp.content
