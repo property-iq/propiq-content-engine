@@ -31,7 +31,7 @@ class GenerateRequest(BaseModel):
     chart_intent: str = Field(
         default="trend",
         description="Chart intent for charts-api",
-        examples=["trend", "hbar", "scatter", "dual_axis"],
+        examples=["trend", "hbar", "scatter", "boxplot", "matrix", "table", "quadrant"],
     )
     period: str = Field(
         default="T12M",
