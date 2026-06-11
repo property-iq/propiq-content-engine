@@ -6,8 +6,9 @@ from datetime import date
 from pathlib import Path
 
 import yaml
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 
+from app.auth import require_api_key
 from app.config import settings
 from app.engine.composer import compose
 from app.engine.planner import plan_daily_content
@@ -20,7 +21,11 @@ logger = logging.getLogger(__name__)
 router = APIRouter(tags=["generate"])
 
 
-@router.post("/generate", response_model=GenerateResponse)
+@router.post(
+    "/generate",
+    response_model=GenerateResponse,
+    dependencies=[Depends(require_api_key)],
+)
 async def generate(req: GenerateRequest):
     """Generate a content package from data + charts + LLM copy."""
 
@@ -155,7 +160,7 @@ async def generate(req: GenerateRequest):
     )
 
 
-@router.post("/generate-daily")
+@router.post("/generate-daily", dependencies=[Depends(require_api_key)])
 async def generate_daily(max_items: int = 5, template: str = "story/dark-01"):
     """Auto-generate a batch of content for today.
 

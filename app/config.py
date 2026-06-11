@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 
 from pydantic_settings import BaseSettings
@@ -24,6 +25,21 @@ class Settings(BaseSettings):
 
     # Timeouts (seconds)
     http_timeout: float = 30.0
+
+    # Generation auth (see app/auth.py and issue #7).
+    # On Cloud Run: mounted from Secret Manager (operator sibling).
+    # Locally: leave empty to keep endpoints open for dev convenience.
+    content_engine_api_key: str = ""
+
+    @property
+    def is_production(self) -> bool:
+        """True when running on Cloud Run.
+
+        ``K_SERVICE`` is set automatically by the Cloud Run runtime in every
+        container and is unset locally — so this needs no deploy.yml change.
+        Read at call time, not import time, so tests can monkeypatch the env.
+        """
+        return bool(os.environ.get("K_SERVICE"))
 
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8"}
 
