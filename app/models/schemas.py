@@ -3,11 +3,23 @@ from typing import Optional
 from pydantic import BaseModel, Field
 
 
+# Path-component patterns — these flow unvalidated into filesystem paths in
+# app/routers/generate.py (template loaded via settings.templates_dir / req.template;
+# output written to settings.output_dir / today / f"{category}-{entity_slug}").
+# Excluding `/` (beyond the single template separator), `..`, `\`, leading `/`,
+# and null bytes makes path traversal structurally impossible post-validation.
+# See issue #8.
+_SLUG_PATTERN = r"^[a-z0-9-]+$"
+_TEMPLATE_PATTERN = r"^[a-z0-9]+/[a-z0-9-]+$"
+
+
 class GenerateRequest(BaseModel):
     category: str = Field(
         ...,
         description="Content category",
         examples=["market-insight", "news-commentary", "data-highlight"],
+        pattern=_SLUG_PATTERN,
+        max_length=64,
     )
     entity_type: str = Field(
         ...,
@@ -18,10 +30,14 @@ class GenerateRequest(BaseModel):
         ...,
         description="Entity slug identifier",
         examples=["dubai-marina", "jumeirah-village-circle"],
+        pattern=_SLUG_PATTERN,
+        max_length=128,
     )
     template: str = Field(
         default="story/dark-01",
         description="Template path relative to templates/",
+        pattern=_TEMPLATE_PATTERN,
+        max_length=64,
     )
     metric: str = Field(
         default="price",

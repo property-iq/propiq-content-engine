@@ -6,7 +6,7 @@ from datetime import date
 from pathlib import Path
 
 import yaml
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 
 from app.auth import require_api_key
 from app.config import settings
@@ -161,7 +161,10 @@ async def generate(req: GenerateRequest):
 
 
 @router.post("/generate-daily", dependencies=[Depends(require_api_key)])
-async def generate_daily(max_items: int = 5, template: str = "story/dark-01"):
+async def generate_daily(
+    max_items: int = Query(5, ge=1, le=20),
+    template: str = "story/dark-01",
+):
     """Auto-generate a batch of content for today.
 
     The planner queries upstream services to find noteworthy data points,
