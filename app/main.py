@@ -44,10 +44,13 @@ app.include_router(generate_router)
 async def health():
     upstream = {}
     async with httpx.AsyncClient(timeout=5.0) as client:
+        # charts-img is deliberately absent: it is PARKED (ADR 0017) and its
+        # last revision may not answer, which would make /health lie (report a
+        # dependency red for a service we chose to stop). Only live dependencies
+        # are health-gated. See issue #17.
         for name, url in [
             ("data-api", f"{settings.data_api_base}/health"),
             ("charts-api", f"{settings.charts_api_base}/health"),
-            ("charts-img", f"{settings.charts_img_base}/health"),
         ]:
             try:
                 resp = await client.get(url)

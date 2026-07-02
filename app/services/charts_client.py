@@ -15,7 +15,20 @@ async def get_chart_png(
 
     Charts-img accepts the same request format as charts-api and returns
     a PNG directly (it calls charts-api internally).
+
+    charts-img is PARKED (ADR 0017 — static PNG rendering moved to the
+    consumer/NAR side), so ``charts_img_base`` defaults to empty. When it is
+    empty we refuse loudly at call time rather than fire a silent HTTP request
+    at a dead host. Set ``CHARTS_IMG_BASE`` explicitly to re-enable — the park
+    is config-reversible. See issue #17.
     """
+    if not settings.charts_img_base:
+        raise RuntimeError(
+            "charts-img is parked (ADR 0017): CHARTS_IMG_BASE is unset, so "
+            "chart PNG rendering is disabled. Set CHARTS_IMG_BASE explicitly "
+            "to re-enable. See issue #17."
+        )
+
     chart_request = {
         "intent": intent,
         "metric": metric,
