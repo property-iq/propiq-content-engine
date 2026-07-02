@@ -8,7 +8,11 @@ class Settings(BaseSettings):
     # Upstream services
     data_api_base: str = "https://propiq-data-api-429012647952.me-central1.run.app"
     charts_api_base: str = "https://propiq-charts-api-429012647952.me-central1.run.app"
-    charts_img_base: str = "https://propiq-charts-img-429012647952.me-central1.run.app"
+    # charts-img is PARKED (ADR 0017 — static PNG rendering moved to the
+    # consumer/NAR side). Empty default so the dormant charts client refuses
+    # loudly instead of firing a silent HTTP call at a dead prod host. Set this
+    # explicitly to re-enable — the park is config-reversible. See issue #17.
+    charts_img_base: str = ""
 
     # LLM — Vertex AI primary, direct Anthropic fallback
     anthropic_api_key: str = ""  # Optional: enables direct API fallback
