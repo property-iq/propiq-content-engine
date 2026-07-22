@@ -7,6 +7,10 @@ from pydantic_settings import BaseSettings
 class Settings(BaseSettings):
     # Upstream services
     data_api_base: str = "https://propiq-data-api-429012647952.me-central1.run.app"
+    # X-API-Key sent to data-api. Empty by default → no header, behaves as today.
+    # Step 1 of the infra#22 fail-closed flip (consumer presents before provider
+    # enforces); safe to ship before any key exists. Env: DATA_API_KEY.
+    data_api_key: str = ""
     charts_api_base: str = "https://propiq-charts-api-429012647952.me-central1.run.app"
     # charts-img is PARKED (ADR 0017 — static PNG rendering moved to the
     # consumer/NAR side). Empty default so the dormant charts client refuses
