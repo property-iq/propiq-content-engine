@@ -28,6 +28,19 @@ jobs:
 
       - name: Deploy to Cloud Run
         run: |
+          # DO NOT REMOVE DATA_API_KEY from --set-secrets below — it arms this
+          # service against data-api's X-API-Key enforcement (infra#22).
+          # --set-secrets REPLACES the whole set, so a key mounted by hand with
+          # `gcloud run services update` is silently stripped by the next merge
+          # to main, after which this service 401s against data-api with nothing
+          # in the deploy log naming the cause. Merging this file IS the arming
+          # step.
+          #
+          # Pinned :1, not :latest. Cloud Run resolves `latest` when a CONTAINER
+          # INSTANCE STARTS, so rotating the secret without rolling a revision
+          # leaves a mixed fleet answering with two different keys. A pinned
+          # version cannot be adopted by a scale-up, so rotation requires a
+          # visible deploy.
           gcloud run deploy propiq-content-engine \
             --source . \
             --region me-central1 \
@@ -39,4 +52,4 @@ jobs:
             --memory 2Gi \
             --cpu-boost \
             --set-env-vars "VERTEX_REGION=us-east5" \
-            --set-secrets "ANTHROPIC_API_KEY=anthropic-api-key:latest"
+            --set-secrets "ANTHROPIC_API_KEY=anthropic-api-key:latest,DATA_API_KEY=data-api-rest-key:1"
